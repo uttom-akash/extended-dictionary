@@ -24,9 +24,6 @@ namespace dictionary_learner
                 PrintUtils.CliPointer();
                 
                 string command=Console.ReadLine();
-                Console.WriteLine(command);
-                continue;
-
                 if(command.Equals("exit"))
                     break;
 
