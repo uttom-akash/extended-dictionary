@@ -10,7 +10,7 @@ namespace dictionary_learner.io{
         public CSVReader(string path){
             reader=new StreamReader(path);
         }
-        public async Task<List<IEnumerable<string>>> readCSV(){
+        public async Task<List<IEnumerable<string>>> ReadCSV(){
             List<IEnumerable<string>> csv=new List<IEnumerable<string>>();
             string pattern="\"";
             while (!reader.EndOfStream)
