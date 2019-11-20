@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using dictionary_learner.io;
 using System.Threading.Tasks;
 using System.Linq;
+using dictionary_learner.services;
+using dictionary_learner.utils;
+using dictionary_learner.token;
+using dictionary_learner.error;
 
 namespace dictionary_learner
 {
@@ -13,111 +17,60 @@ namespace dictionary_learner
         private static Tree tree=new Tree(30,"./assets/tree.txt");
         static async Task  Main(string[] args)
         {
-
-            
+            tree.Load();
             while(true){
-                Console.ForegroundColor=ConsoleColor.Green;
-                Console.WriteLine();
-                Console.WriteLine("Commands :");
-                Console.WriteLine("read : read the csv");
-                Console.WriteLine("load : load tree");
-                Console.WriteLine("save : save tree");
-                Console.WriteLine("insert word: insert a 'word'");
-                Console.WriteLine("search word: search 'word'");
-                Console.WriteLine("auto word : prefix search 'word'");
                 
+                PrintUtils.HelpHeader();
+                PrintUtils.CliPointer();
                 
-                Console.Write(">");
                 string command=Console.ReadLine();
-                string[] commands=command.Split(' ');
-                    if(commands[0]=="read"){
-                        await initialize();
-                    }
-                    else if(commands[0]=="load"){
-                        tree.load();
-                    }
-                    else if(commands[0]=="save"){
-                        tree.store();
-                    }
-                    else if(commands[0]=="insert"){
-                        var it=commands.GetEnumerator();
-                        it.MoveNext();
-                        it.MoveNext();
-                        var word=it.Current as string;
-                        it.MoveNext();
-                        var partOfSpeech=it.Current as string;
-                        it.MoveNext();
-                        var meaning=it.Current as string;
-                        
-                        tree.insert(word,partOfSpeech,meaning);
+                Console.WriteLine(command);
+                continue;
 
-                    }else if(commands[0]=="search"){
-                        Console.WriteLine(tree.search(commands[1]));
-                    }else if(commands[0]=="auto"){
-                        List<Info> words=tree.findWordsWithPrefix(commands[1]);
-                        foreach (var word in words)
-                        {
-                            Console.ForegroundColor=ConsoleColor.Red;
-                            Console.Write(word.word);
-                            Console.ForegroundColor=ConsoleColor.DarkGray;
-                            Console.Write($" ({word.partOfSpeech}) ");
-                            Console.ForegroundColor=ConsoleColor.White;
-                            Console.WriteLine($"   -> {word.meaning}");
-                            Console.ResetColor();
-                            Console.WriteLine();
-                            
-                        }
-                        Console.WriteLine();
-                        Console.WriteLine();
-                        Console.WriteLine();
-                    }
-                    else{
-                        break;
-                    }
+                if(command.Equals("exit"))
+                    break;
+
+
+
+                Lexer lexer=new Lexer(command);    
+                FunctionalToken token=lexer.Lex();
+                if(token.Kind==TokenKind.Invalid)
+                    ErrorBag.ReportError($"Invalid functional keyword {token}.");
+
+
+                if(ErrorBag.errors.Count>0){
+                    PrintUtils.PrintError(ErrorBag.errors);
+                }else{
+                    await handleCommand(token);
+                }
+
+                
+                ErrorBag.ClearBag();   
             }
-            Console.ResetColor();
+            tree.Store();
         }
 
 
-        static async Task initialize(){
-             CSVReader cSVReader=new CSVReader("./assets/dictionary.csv");
-             List<IEnumerable<string>> csv=await cSVReader.readCSV();
-                foreach (var line in csv)
-                {  
-                
-                    var enumrator=line.GetEnumerator();
+        public static async Task handleCommand(FunctionalToken token){
 
-                    enumrator.MoveNext();
-                    var word=enumrator.Current;
-                    
-                    enumrator.MoveNext();
-                    var partOfSpeech=enumrator.Current;
-                    
-                    enumrator.MoveNext();
-                    var meaning=enumrator.Current;
-                    word=word.ToLower();
-                    Console.WriteLine(word);
-                    tree.insert(word,partOfSpeech,meaning);     
+                switch (token.Kind)
+                {
+                    case TokenKind.Help:PrintUtils.ManualPage();break;
+                    case TokenKind.Read: await ReadDictionaryCSV.Read(tree,token);break;
+                    case TokenKind.Reset:await ReadDictionaryCSV.Reset(tree);break;
+                    case TokenKind.Reload:tree.Load();break;
+                    case TokenKind.Save:tree.Store();break;
+                    case TokenKind.Insert:TeachService.insertToDictionary(tree,token);break;
+                    case TokenKind.Search:SearchService.search(tree,token);break;
+                    case TokenKind.Suggest: SuggestionService.suggest(tree,token);break;
                 }
         }
-        static void processCommand(string command){
-               Queue<string>tokens=new Queue<string>();
 
-               bool previousWhitespace=false;
-               command=command+" ";
-               string word="";
-               foreach (var character in command)
-               {
-                   if(char.IsWhiteSpace(character))
-                   {
-                       if(previousWhitespace)continue;
-                       tokens.Enqueue(word); 
-                       previousWhitespace=true;
-                       continue;
-                   }
-                   previousWhitespace=false;
-                   word=word+character;
-               }
-        }
+        
+
+        
+
+       
+        
     }
 }

@@ -4,6 +4,9 @@ using System.IO;
 
 namespace dictionary_learner.data_structure
 {
+    class Vowel{
+        public static List<int> vowels=new List<int>{0,4,8,14,20};
+    }
     class Tree
     {
         private Node root;
@@ -25,7 +28,7 @@ namespace dictionary_learner.data_structure
         }
 
 
-        public void insert(string word,string partOfSpeech="",string meaning=""){
+        public void Insert(string word,string partOfSpeech="",string meaning=""){
             if(word.Length<=0)
                 return ;
 
@@ -47,7 +50,7 @@ namespace dictionary_learner.data_structure
             iterator.isEnd=true;
         }
 
-        public bool search(string word){
+        public Info ExactSearch(string word){
             Node iterator=root;
             foreach (char character in word)
             {
@@ -55,29 +58,69 @@ namespace dictionary_learner.data_structure
                 if(child>26 || child<0)
                     child=28;
                 if(iterator.childs[child]==null)
-                    return false;
+                    return new Info{word=""};   
+                
                 iterator=iterator.childs[child];
             }
-            return iterator.isEnd;
+            if(iterator.isEnd)
+                return new Info{word=iterator.word,partOfSpeech=iterator.partOfSpeech,meaning=iterator.meaning};
+            else
+                return new Info{word="",partOfSpeech="",meaning=""};
         }
 
-        public int numberOfWordsWithPrefix(string prefix){
-            Node iterator=root;
-            foreach (char character in prefix)
-            {
-                int child=(int)character-'a';
-                if(child>26 || child<0)
-                    child=28;
-                if(iterator.childs[child]==null)
-                    return 0;
-                iterator=iterator.childs[child];
-            }
-            return iterator.numberOfChilds;
+        public List<Info> TolarateVowelSearch(string word){
+                
+                List<Info> words=new List<Info>();
+                var letters=word.ToCharArray();
+                int length=letters.Length;
+
+
+                Queue<Tuple<Node,int>> bfs=new Queue<Tuple<Node, int>>();
+                bfs.Enqueue(new Tuple<Node,int>(root,0));
+
+                while (bfs.Count>0)
+                {
+                    Tuple<Node,int> currentTupple=bfs.Dequeue();
+                    Node currentNode=currentTupple.Item1;
+                    int currentIndex=currentTupple.Item2;
+
+                    if(currentIndex<length){
+
+                                char letter=letters[currentIndex];
+                                int child=(int)letter-'a';
+                                
+
+                                if(child>26 || child<0)
+                                    child=28;
+                                
+                                int bindex=Vowel.vowels.BinarySearch(child);
+                                if(bindex>=0){
+                                    foreach (var vowel in Vowel.vowels)
+                                    {
+                                        if(child!=vowel &&  currentNode.childs[vowel]!=null)
+                                        {
+                                            bfs.Enqueue(new Tuple<Node, int>(currentNode.childs[vowel],currentIndex+1));   
+                                        }
+
+                                    }
+                                }
+
+                                if(currentNode.childs[child]!=null){
+                                    bfs.Enqueue(new Tuple<Node, int>(currentNode.childs[child],currentIndex+1));
+                                }
+
+                    }else{
+
+                                if(currentNode.isEnd)
+                                    words.Add(new Info{word=currentNode.word,partOfSpeech=currentNode.partOfSpeech,meaning=currentNode.meaning});
+
+                    }
+                }
+            return words;
         }
 
-        public List<Info> findWordsWithPrefix(string prefix){
+        public List<Info> FindWordsWithPrefix(string prefix,int limit=50){
             Node iterator=root;
-
             foreach (var character in prefix)
             {
                 int child=(int)character-'a';
@@ -88,11 +131,68 @@ namespace dictionary_learner.data_structure
                 iterator=iterator.childs[child];  
             }
             
-            return traverse(iterator);
+            return Traverse(iterator,limit);
         }
 
+        public List<Info> FindWordsWithPrefixTolaratingeVowel(string word,int limit =10){
+                
+                List<Info> words=new List<Info>();
+                List<Node> leaves=new List<Node>();
 
-        public List<Info> traverse(Node source){
+                var letters=word.ToCharArray();
+                int length=letters.Length;
+
+
+                Queue<Tuple<Node,int>> bfs=new Queue<Tuple<Node, int>>();
+                bfs.Enqueue(new Tuple<Node,int>(root,0));
+
+                while (bfs.Count>0)
+                {
+                    Tuple<Node,int> currentTupple=bfs.Dequeue();
+                    Node currentNode=currentTupple.Item1;
+                    int currentIndex=currentTupple.Item2;
+
+                    if(currentIndex<length){
+
+                                char letter=letters[currentIndex];
+                                int child=(int)letter-'a';
+                                
+
+                                if(child>26 || child<0)
+                                    child=28;
+                                if(currentNode.childs[child]!=null){
+                                    bfs.Enqueue(new Tuple<Node, int>(currentNode.childs[child],currentIndex+1));
+                                }else{
+                                    int bindex=Vowel.vowels.BinarySearch(child);
+                                    if(bindex>=0){
+                                        foreach (var vowel in Vowel.vowels)
+                                        {
+                                            if(child!=vowel &&  currentNode.childs[vowel]!=null)
+                                            {
+                                                bfs.Enqueue(new Tuple<Node, int>(currentNode.childs[vowel],currentIndex+1));   
+                                            }
+
+                                        }
+                                    }
+                                }
+
+                    }else{
+
+                                if(currentNode.isEnd)
+                                    words.Add(new Info{word=currentNode.word,partOfSpeech=currentNode.partOfSpeech,meaning=currentNode.meaning});
+                                leaves.Add(currentNode);
+                    }
+                }
+            if(words.Count>=limit)
+                return words;
+            foreach (var leaf in leaves)
+            {
+                words.AddRange(Traverse(leaf,limit));    
+            }    
+            return words;
+        }
+
+        public List<Info> Traverse(Node source,int limit){
             List<Info> words=new List<Info>();
             Stack<Node> dfs=new Stack<Node>();
             dfs.Push(source);
@@ -100,7 +200,9 @@ namespace dictionary_learner.data_structure
             while(dfs.Count>0){
                 Node currentNode=dfs.Pop();
 
-                
+                if(words.Count>=limit)
+                    return words;
+
                 foreach (var child in currentNode.childs)
                 {
                     if(child==null)continue;
@@ -115,10 +217,24 @@ namespace dictionary_learner.data_structure
             return words;
         }
 
+        public int NumberOfWordsWithPrefix(string prefix){
+            Node iterator=root;
+            foreach (char character in prefix)
+            {
+                int child=(int)character-'a';
+                if(child>26 || child<0)
+                    child=28;
+                if(iterator.childs[child]==null)
+                    return 0;
+                iterator=iterator.childs[child];
+            }
+            return iterator.numberOfChilds;
+        }
+
 
 
         // store tree
-        public void store(){
+        public void Store(){
             Queue<Node> bfs=new Queue<Node>();
             bfs.Enqueue(root);
             StreamWriter writer=new StreamWriter(path);
@@ -140,7 +256,7 @@ namespace dictionary_learner.data_structure
         }
 
 
-        public void load(){
+        public void Load(){
             Queue<Node> bfs=new Queue<Node>();
             bfs.Enqueue(root);
             StreamReader reader=new StreamReader(path);
