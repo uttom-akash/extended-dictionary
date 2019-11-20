@@ -24,23 +24,12 @@ namespace dictionary_learner.services{
          }
          public static async Task Reset(Tree tree,string path="./assets/dictionary.csv"){
              CSVReader cSVReader=new CSVReader(path);
-             List<IEnumerable<string>> csv=await cSVReader.ReadCSV();
-                foreach (var line in csv)
-                {  
-                
-                    var enumrator=line.GetEnumerator();
 
-                    enumrator.MoveNext();
-                    var word=enumrator.Current;
-                    
-                    enumrator.MoveNext();
-                    var partOfSpeech=enumrator.Current;
-                    
-                    enumrator.MoveNext();
-                    var meaning=enumrator.Current;
-                    word=word.ToLower();
-                    Console.WriteLine(word);
-                    tree.Insert(word,partOfSpeech,meaning);     
+             List<Info> csv=await cSVReader.ReadCSV();
+               
+                foreach (var info in csv)
+                {  
+                    tree.Insert(info.word,info.partOfSpeech,info.meaning);     
                 }
         }    
     }
