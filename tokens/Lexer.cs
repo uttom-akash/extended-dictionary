@@ -94,6 +94,7 @@ namespace dictionary_learner.token{
                 case "insert":  return TokenKind.Insert;
                 case "search":  return TokenKind.Search;
                 case "suggest": return TokenKind.Suggest;
+                case "clear"  : return TokenKind.Clear;
                 default:        return TokenKind.Invalid; 
             }
         }

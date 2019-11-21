@@ -11,13 +11,13 @@ namespace dictionary_learner.token{
         Read,
         Reload,
         Save,
+        Clear,
         Invalid,
 
         // optional
         Tollarance,
         VowelTollrance,
         Limit,
-
-
+        
     }
 }

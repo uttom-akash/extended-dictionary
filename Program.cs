@@ -9,6 +9,7 @@ using dictionary_learner.services;
 using dictionary_learner.utils;
 using dictionary_learner.token;
 using dictionary_learner.error;
+using System.Threading;
 
 namespace dictionary_learner
 {
@@ -18,12 +19,17 @@ namespace dictionary_learner
         private static Tree tree=new Tree(30,"./assets/tree.txt");
         static async Task  Main(string[] args)
         {
-            tree.Load();
+            Thread loading=new Thread(tree.Load);
+            loading.Start();
+
+            PrintUtils.printLoading("starting");
+
             while(true){
-                
+                loading.Join();
+
                 PrintUtils.HelpHeader();
                 PrintUtils.CliPointer();
-                
+    
                 string command=Console.ReadLine();
                 if(command.Equals("exit"))
                     break;
@@ -54,6 +60,7 @@ namespace dictionary_learner
                 switch (token.Kind)
                 {
                     case TokenKind.Help:PrintUtils.ManualPage();break;
+                    case TokenKind.Clear:Console.Clear();break;
                     case TokenKind.Read: await ReadDictionaryCSV.Read(tree,token);break;
                     case TokenKind.Reset:await ReadDictionaryCSV.Reset(tree);break;
                     case TokenKind.Reload:tree.Load();break;

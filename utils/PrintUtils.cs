@@ -1,27 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using dictionary_learner.data_structure;
 
 namespace dictionary_learner.utils
 {
     class PrintUtils{
+        public static bool loading=false;
+
+        public static void printLoading(object message){
+            Console.ForegroundColor=ConsoleColor.DarkRed;
+            Console.WriteLine($"{message} ....");
+            Console.ResetColor();
+        }
+        
         public static void PrintWords(List<Info> infos){
             foreach (var info in infos)
             {
-                Console.ForegroundColor=ConsoleColor.Red;
+                Console.ForegroundColor=ConsoleColor.Blue;
                 Console.WriteLine();
                 Console.Write(info.word);
-                Console.ForegroundColor=ConsoleColor.Blue;
-                Console.Write($" ({info.partOfSpeech}) ");
+                Console.ForegroundColor=ConsoleColor.DarkRed;
+                Console.Write($" ({info.partOfSpeech}) ->");
                 Console.ForegroundColor=ConsoleColor.Gray;
-                Console.WriteLine($"  -> {info.meaning}");
+                Console.WriteLine($"  {info.meaning}");
                 Console.WriteLine();
                 Console.ResetColor();
             }
         }
 
         public static void ManualPage(){
-                Console.ForegroundColor=ConsoleColor.DarkGreen;
+                Console.ForegroundColor=ConsoleColor.Blue;
                 Console.WriteLine();
                 Console.WriteLine("Manual");
                 Console.WriteLine();
@@ -30,9 +39,9 @@ namespace dictionary_learner.utils
                 Console.WriteLine();
                 Console.WriteLine("search [word]                             :    search a word");
                 Console.WriteLine("search -tv [word]                         :    search a word with vowel tollarance");
-                // Console.WriteLine("search -t [t] [word]                   :    search a word with tolarance(t)");
                 Console.WriteLine("suggest [word]                            :    suggestion of words starting [word]");
                 Console.WriteLine("suggest -l [l] [word]                     :    suggestion of words starting [word] within limit(l)");
+                Console.WriteLine("suggest -l [l] -tv [word]                 :    suggestion of words starting [word] within limit(l) with tollarance");
                 Console.WriteLine("insert  [word] [part of speeach] [meaning]:    insert a word");
                 Console.WriteLine("reset                                     :    reset dictionary");
                 Console.WriteLine("read [path]                               :    read custom csv");
@@ -43,17 +52,16 @@ namespace dictionary_learner.utils
         }
 
         public static void HelpHeader(){
-                Console.ForegroundColor=ConsoleColor.DarkGreen;
+                Console.ForegroundColor=ConsoleColor.Cyan;
                 Console.WriteLine();
-                Console.WriteLine("Usage: ");
-                Console.WriteLine("help :   command for help manual");
+                Console.WriteLine("help : show manual page");
                 Console.WriteLine();
                 Console.ResetColor();
                 
         }
 
         public static void CliPointer(){
-            Console.ForegroundColor=ConsoleColor.DarkGreen;
+            Console.ForegroundColor=ConsoleColor.Blue;
             Console.Write(">"); 
             Console.ResetColor(); 
         }
@@ -65,7 +73,7 @@ namespace dictionary_learner.utils
         public static void PrintFoundHeader(int numberOfWords){
             Console.ForegroundColor=ConsoleColor.DarkGreen;
             Console.WriteLine();
-            Console.WriteLine($"{numberOfWords} words found !!");
+            Console.WriteLine($"{numberOfWords} words found");
             Console.WriteLine();
             Console.ResetColor();
         }
