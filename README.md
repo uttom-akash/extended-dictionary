@@ -7,4 +7,5 @@
 # key points
     1 . c# tree serialization
     2 . loading and saving massive data as tree
-    3 . algorithm (trie,dfs,bfs)
+    3 . vowel tollarance 
+    4 . algorithm (trie,dfs,bfs)
