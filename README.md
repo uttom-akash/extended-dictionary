@@ -1,4 +1,4 @@
-# Advanced-Dictionary
+# extended Dictionary
     a simple terminal dictionary for rapid auto completion,search and meaning ..
 
 # usage

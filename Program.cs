@@ -14,6 +14,7 @@ namespace dictionary_learner
 {
     class Program
     {
+        
         private static Tree tree=new Tree(30,"./assets/tree.txt");
         static async Task  Main(string[] args)
         {

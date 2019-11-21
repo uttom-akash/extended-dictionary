@@ -22,15 +22,14 @@ namespace dictionary_learner.services{
                     Console.WriteLine("read [csv path]");
                 }
          }
-         public static async Task Reset(Tree tree,string path="./assets/dictionary.csv"){
-             CSVReader cSVReader=new CSVReader(path);
-
+         public static async Task Reset(Tree tree,string path="./assets/alternateDictionary.csv"){
+             AlternateCsvReader cSVReader=new AlternateCsvReader(path);
              List<Info> csv=await cSVReader.ReadCSV();
-               
-                foreach (var info in csv)
-                {  
-                    tree.Insert(info.word,info.partOfSpeech,info.meaning);     
-                }
+   
+            foreach (var info in csv)
+            {  
+                tree.Insert(info.word,info.partOfSpeech,info.meaning);     
+            }
         }    
     }
 }
